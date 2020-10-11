@@ -14,8 +14,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   if (USE_FIRESTORE_EMULATOR) {
-    FirebaseFirestore.instance.settings = Settings(
-        host: 'localhost:8080', sslEnabled: false, persistenceEnabled: false);
+    FirebaseFirestore.instance.settings =
+        Settings(host: 'localhost:8080', sslEnabled: false, persistenceEnabled: false);
   }
   runApp(FirestoreExampleApp());
 }
@@ -25,19 +25,47 @@ void main() async {
 /// Returns a [MaterialApp].
 class FirestoreExampleApp extends StatelessWidget {
   /// Given a [Widget], wrap and return a [MaterialApp].
-  MaterialApp withMaterialApp(Widget body) {
+  MaterialApp withMaterialApp(Widget body, Widget fab) {
     return MaterialApp(
       title: 'Firestore Example App',
       theme: ThemeData.dark(),
       home: Scaffold(
         body: body,
+        floatingActionButton: fab,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return withMaterialApp(Center(child: FilmList()));
+    return withMaterialApp(Center(child: FilmList()), FilmFAB());
+  }
+}
+
+/// Add a hardcoded filem
+class FilmFAB extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    void _onPressed() {
+      FirebaseFirestore.instance.collection('firestore-example-app').add({
+        'rated': 'R',
+        'score': 59,
+        'year': 2019,
+        'director': 'Todd Phillips',
+        'genre': ['Action', 'Crime', 'Drama'],
+        'runtime': '122 min',
+        'title': 'Joker',
+        'poster':
+            'https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SX300.jpg',
+        'released': '04 Oct 2019',
+        'likes': 0,
+      });
+    }
+
+    return FloatingActionButton(
+      child: Icon(Icons.add),
+      onPressed: _onPressed,
+    );
   }
 }
 
@@ -54,8 +82,7 @@ class _FilmListState extends State<FilmList> {
 
   @override
   Widget build(BuildContext context) {
-    Query query =
-        FirebaseFirestore.instance.collection('firestore-example-app');
+    Query query = FirebaseFirestore.instance.collection('firestore-example-app');
 
     void _onActionSelected(String value) async {
       if (value == "batch_reset_likes") {
@@ -218,8 +245,7 @@ class Movie extends StatelessWidget {
 
   /// Return the movie title.
   Widget get title {
-    return Text("${movie['title']} (${movie['year']})",
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold));
+    return Text("${movie['title']} (${movie['year']})", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold));
   }
 
   /// Returns metadata about the movie.
@@ -227,9 +253,7 @@ class Movie extends StatelessWidget {
     return Padding(
         padding: EdgeInsets.only(top: 8),
         child: Row(children: [
-          Padding(
-              child: Text('Rated: ${movie['rated']}'),
-              padding: EdgeInsets.only(right: 8)),
+          Padding(child: Text('Rated: ${movie['rated']}'), padding: EdgeInsets.only(right: 8)),
           Text('Runtime: ${movie['runtime']}'),
         ]));
   }
@@ -239,9 +263,7 @@ class Movie extends StatelessWidget {
     List<Widget> items = <Widget>[];
     movie['genre'].forEach((genre) {
       items.add(Padding(
-        child: Chip(
-            label: Text(genre, style: TextStyle(color: Colors.white)),
-            backgroundColor: Colors.lightBlue),
+        child: Chip(label: Text(genre, style: TextStyle(color: Colors.white)), backgroundColor: Colors.lightBlue),
         padding: EdgeInsets.only(right: 2),
       ));
     });
@@ -250,8 +272,7 @@ class Movie extends StatelessWidget {
 
   /// Returns all genres.
   Widget get genres {
-    return Padding(
-        padding: EdgeInsets.only(top: 8), child: Wrap(children: genreItems()));
+    return Padding(padding: EdgeInsets.only(top: 8), child: Wrap(children: genreItems()));
   }
 
   @override
@@ -295,8 +316,7 @@ class _Likes extends State<Likes> {
 
     try {
       // Return and set the updated "likes" count from the transaction
-      int newLikes = await FirebaseFirestore.instance
-          .runTransaction<int>((transaction) async {
+      int newLikes = await FirebaseFirestore.instance.runTransaction<int>((transaction) async {
         DocumentSnapshot txSnapshot = await transaction.get(widget.reference);
 
         if (!txSnapshot.exists) {
