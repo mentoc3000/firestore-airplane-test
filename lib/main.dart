@@ -46,8 +46,8 @@ class FirestoreExampleApp extends StatelessWidget {
 class FilmFAB extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    void _onPressed() {
-      FirebaseFirestore.instance.collection('firestore-example-app').add({
+    void _onPressed() async {
+      final docRef = await FirebaseFirestore.instance.collection('firestore-example-app').add({
         'rated': 'R',
         'score': 59,
         'year': 2019,
@@ -60,6 +60,8 @@ class FilmFAB extends StatelessWidget {
         'released': '04 Oct 2019',
         'likes': 0,
       });
+      final snapshot = await docRef.get();
+      print(snapshot.data());
     }
 
     return FloatingActionButton(
